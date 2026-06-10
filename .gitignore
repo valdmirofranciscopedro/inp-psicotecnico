@@ -1,0 +1,40 @@
+# ─── Node ────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Build outputs ────────────────────────────────────
+backend/dist/
+frontend/.next/
+frontend/out/
+
+# ─── Variáveis de ambiente (NUNCA commitar) ───────────
+.env
+.env.local
+.env.production
+.env.*.local
+backend/.env
+frontend/.env.local
+
+# ─── Uploads (ficheiros dos candidatos) ──────────────
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# ─── Logs ─────────────────────────────────────────────
+logs/
+*.log
+
+# ─── SO ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── IDE ──────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# ─── Prisma ───────────────────────────────────────────
+backend/prisma/*.db
+backend/prisma/*.db-journal

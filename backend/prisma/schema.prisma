@@ -1,0 +1,160 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// Administradores do sistema
+// ─────────────────────────────────────────
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  nome         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@map("admins")
+}
+
+// ─────────────────────────────────────────
+// Candidato inscrito
+// ─────────────────────────────────────────
+model Candidato {
+  id                   String    @id @default(cuid())
+  
+  // Dados pessoais
+  nomeCompleto         String
+  numeroProcesso       String    @unique
+  email                String    @unique
+  telefone             String
+  telefoneAlternativo  String?
+  bilheteIdentidade    String    @unique
+  genero               Genero
+  
+  // Localização
+  provincia            Provincia
+  localizacaoActual    String
+
+  // Dados académicos
+  cursoFrequentado     String
+  anoConclusao         Int
+
+  // Preferência
+  localTeste           LocalTeste
+
+  // Documentos enviados
+  documentos           Documento[]
+
+  // Estado da inscrição
+  estado               EstadoInscricao @default(PENDENTE)
+  
+  // Confirmação de email
+  emailConfirmado      Boolean   @default(false)
+  tokenConfirmacao     String?   @unique
+  tokenExpiracao       DateTime?
+  emailConfirmadoEm    DateTime?
+
+  // Controlo de duplicados: hash do BI para comparação rápida
+  biHash               String    @unique
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([provincia])
+  @@index([estado])
+  @@index([localTeste])
+  @@index([cursoFrequentado])
+  @@map("candidatos")
+}
+
+// ─────────────────────────────────────────
+// Documentos enviados pelo candidato
+// ─────────────────────────────────────────
+model Documento {
+  id           String       @id @default(cuid())
+  candidatoId  String
+  candidato    Candidato    @relation(fields: [candidatoId], references: [id], onDelete: Cascade)
+  tipo         TipoDocumento
+  nomeOriginal String
+  nomeFicheiro String       // nome UUID no disco
+  mimeType     String
+  tamanhoBytes Int
+  caminho      String       // caminho relativo no servidor
+  uploadedAt   DateTime     @default(now())
+
+  @@map("documentos")
+}
+
+// ─────────────────────────────────────────
+// Log de auditoria — acções do admin
+// ─────────────────────────────────────────
+model AuditLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  accao     String   // ex: "CONFIRMOU_INSCRICAO", "EXPORTOU_DADOS"
+  detalhes  Json?    // metadados da acção
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────
+
+enum Genero {
+  MASCULINO
+  FEMININO
+  OUTRO
+  PREFIRO_NAO_INFORMAR
+}
+
+enum Provincia {
+  BENGO
+  BENGUELA
+  BIE
+  CABINDA
+  CUANDO_CUBANGO
+  CUANZA_NORTE
+  CUANZA_SUL
+  CUNENE
+  HUAMBO
+  HUILA
+  LUANDA
+  LUNDA_NORTE
+  LUNDA_SUL
+  MALANJE
+  MOXICO
+  NAMIBE
+  UIGE
+  ZAIRE
+}
+
+enum LocalTeste {
+  LUANDA
+  SUMBE
+}
+
+enum EstadoInscricao {
+  PENDENTE        // submeteu mas não confirmou email
+  CONFIRMADO      // confirmou email
+  REVOGADO        // admin revogou
+}
+
+enum TipoDocumento {
+  BILHETE_IDENTIDADE
+  CERTIFICADO_HABILITACOES
+  CURRICULUM_VITAE
+}

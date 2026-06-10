@@ -1,0 +1,54 @@
+# .github/workflows/deploy.yml
+name: CI/CD — INP Psicotécnico
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ─── Verificação de qualidade de código ──────────────
+  lint-and-type-check:
+    name: Lint & Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Instalar deps backend
+        run: cd backend && npm ci
+
+      - name: Type check backend
+        run: cd backend && npx tsc --noEmit
+
+      - name: Instalar deps frontend
+        run: cd frontend && npm ci
+
+      - name: Type check e lint frontend
+        run: cd frontend && npm run lint
+
+  # ─── Deploy automático na VPS (apenas em push para main) ─
+  deploy:
+    name: Deploy para VPS
+    needs: lint-and-type-check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd /var/www/inp-psicotecnico
+            bash scripts/deploy.sh
