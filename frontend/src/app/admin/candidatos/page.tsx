@@ -1,6 +1,6 @@
 'use client'
 // src/app/admin/candidatos/page.tsx
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import AdminShell from '@/components/admin/AdminShell'
 import { listarCandidatos, confirmarInscricao, revogarInscricao, reenviarEmailAdmin, exportarCandidatos } from '@/lib/api'
@@ -14,7 +14,7 @@ const ESTADO_BADGE: Record<string, { label: string; cls: string }> = {
   REVOGADO: { label: 'Revogado', cls: 'bg-red-50 text-red-700' },
 }
 
-export default function CandidatosPage() {
+function CandidatosContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -256,5 +256,19 @@ export default function CandidatosPage() {
         </div>
       </div>
     </AdminShell>
+  )
+}
+
+export default function CandidatosPage() {
+  return (
+    <Suspense fallback={
+      <AdminShell>
+        <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
+          A carregar...
+        </div>
+      </AdminShell>
+    }>
+      <CandidatosContent />
+    </Suspense>
   )
 }
