@@ -240,7 +240,7 @@ export default function InscricaoPage() {
                     </div>
                     <div>
                       <label className="form-label">Nº de processo <span className="text-red-500">*</span></label>
-                      <input className={`form-input ${errors.numeroProcesso ? 'form-input-error' : ''}`} {...register('numeroProcesso')} placeholder="INP-AAAA-NNNNN" />
+                      <input className={`form-input ${errors.numeroProcesso ? 'form-input-error' : ''}`} {...register('numeroProcesso')} placeholder="Ex. 4321" />
                       {errors.numeroProcesso && <p className="form-error">{errors.numeroProcesso.message}</p>}
                     </div>
                     <div>
@@ -254,8 +254,6 @@ export default function InscricaoPage() {
                         <option value="">Seleccione...</option>
                         <option value="MASCULINO">Masculino</option>
                         <option value="FEMININO">Feminino</option>
-                        <option value="OUTRO">Outro</option>
-                        <option value="PREFIRO_NAO_INFORMAR">Prefiro não informar</option>
                       </select>
                       {errors.genero && <p className="form-error">{errors.genero.message}</p>}
                     </div>
