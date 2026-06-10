@@ -1,11 +1,14 @@
 // src/app/page.tsx
 import Link from 'next/link'
 import { ClipboardList, Mail, Clock, GraduationCap, MapPin, Calendar, Users } from 'lucide-react'
+import ContadorRegressivo from '@/components/public/ContadorRegressivo'
+import Image from 'next/image'
+
 
 async function getStats() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/public/stats`, {
-      next: { revalidate: 300 }, // cache 5 min
+      next: { revalidate: 300 },
     })
     if (!res.ok) return { totalInscritos: 0, totalProvincias: 0 }
     return res.json()
@@ -14,33 +17,61 @@ async function getStats() {
   }
 }
 
-function diasRestantes() {
-  const prazo = new Date('2025-06-30')
-  const hoje = new Date()
-  const diff = Math.ceil((prazo.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
-  return Math.max(0, diff)
+async function getConfiguracoes() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/configuracoes`, {
+      next: { revalidate: 60 },
+    })
+    if (!res.ok) return null
+    return res.json()
+  } catch {
+    return null
+  }
 }
 
 export default async function HomePage() {
-  const stats = await getStats()
-  const dias = diasRestantes()
+  const [stats, config] = await Promise.all([getStats(), getConfiguracoes()])
+
+  const agora = new Date()
+  const dataInicio = config?.dataInicio ? new Date(config.dataInicio) : null
+  const dataTermino = config?.dataTermino ? new Date(config.dataTermino) : null
+
+  const inscricoesAbertas = dataInicio && dataTermino
+    ? agora >= dataInicio && agora <= dataTermino
+    : true
+
+  const inscricoesEncerradas = dataTermino ? agora > dataTermino : false
+  const inscricoesAntesDoInicio = dataInicio ? agora < dataInicio : false
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Topbar */}
+
       <header className="bg-inp-navy px-6 py-3 flex items-center justify-between">
         <div>
-          <p className="text-white text-sm font-medium">INP · Teste Psicotécnico 2025</p>
-          <p className="text-blue-300 text-xs">Instituto Nacional de Petróleos</p>
+          <Image src="/logo-inp.png" alt="Logo INP" width={200} height={200} className="object-contain" />
         </div>
-        <Link href="/inscricao" className="btn-success text-xs px-4 py-2">
-          Inscrever-me
-        </Link>
+        <div className="flex items-center gap-4">
+          {inscricoesAbertas && (
+            <Link href="/inscricao" className="btn-success text-xs px-4 py-2">
+              Inscrever-me
+            </Link>
+          )}
+        </div>
       </header>
 
       {/* Hero */}
       <section className="bg-inp-navy pb-12 pt-10 px-6 text-center">
-        <p className="text-emerald-400 text-xs uppercase tracking-widest mb-3">Inscrições abertas</p>
+        {inscricoesAbertas && (
+          <p className="text-emerald-400 text-xs uppercase tracking-widest mb-3">Inscrições abertas</p>
+        )}
+        {inscricoesEncerradas && (
+          <p className="text-red-400 text-xs uppercase tracking-widest mb-3">Inscrições encerradas</p>
+        )}
+        {inscricoesAntesDoInicio && (
+          <p className="text-amber-400 text-xs uppercase tracking-widest mb-3">Inscrições em breve</p>
+        )}
+
         <h1 className="text-white text-2xl md:text-3xl font-medium mb-3 leading-tight">
           Teste psicotécnico<br />para ex-estudantes INP
         </h1>
@@ -48,17 +79,31 @@ export default async function HomePage() {
           Processo de avaliação exclusivo para diplomados do Instituto Nacional de Petróleos.
           Inscreva-se, confirme o seu email e aguarde a convocatória.
         </p>
-        <Link href="/inscricao" className="btn-success mx-auto">
-          <ClipboardList size={16} />
-          Iniciar inscrição
-        </Link>
+
+        {/* Contador regressivo */}
+        {dataInicio && dataTermino && (
+          <ContadorRegressivo
+            dataInicio={dataInicio.toISOString()}
+            dataTermino={dataTermino.toISOString()}
+          />
+        )}
+
+        {inscricoesAbertas && (
+          <Link href="/inscricao" className="btn-success mx-auto mt-6 inline-flex">
+            <ClipboardList size={16} />
+            Iniciar inscrição
+          </Link>
+        )}
+
         <div className="flex justify-center gap-3 mt-6 flex-wrap">
           <span className="bg-white/10 text-emerald-300 border border-white/20 rounded-full px-3 py-1 text-xs flex items-center gap-1">
             <MapPin size={10} /> Luanda e Sumbe
           </span>
-          <span className="bg-white/10 text-emerald-300 border border-white/20 rounded-full px-3 py-1 text-xs flex items-center gap-1">
-            <Calendar size={10} /> Prazo: 30 Jun 2025
-          </span>
+          {dataTermino && !inscricoesEncerradas && (
+            <span className="bg-white/10 text-emerald-300 border border-white/20 rounded-full px-3 py-1 text-xs flex items-center gap-1">
+              <Calendar size={10} /> Prazo: {dataTermino.toLocaleDateString('pt-AO')}
+            </span>
+          )}
           <span className="bg-white/10 text-emerald-300 border border-white/20 rounded-full px-3 py-1 text-xs flex items-center gap-1">
             <Users size={10} /> Acesso nacional
           </span>
@@ -66,18 +111,22 @@ export default async function HomePage() {
       </section>
 
       {/* Stats bar */}
-      <div className="bg-white border-b border-gray-200 grid grid-cols-3">
-        <div className="py-4 text-center border-r border-gray-200">
-          <p className="text-2xl font-medium text-gray-900">{stats.totalInscritos.toLocaleString('pt-AO')}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Inscritos confirmados</p>
+      <div className="bg-white border-b border-gray-200 grid grid-cols-3 divide-x divide-gray-200">
+        <div className="py-3 px-2 text-center">
+          <p className="text-xl font-medium text-gray-900">{stats.totalInscritos.toLocaleString('pt-AO')}</p>
+          <p className="text-[11px] text-gray-500 mt-0.5 leading-tight">Inscritos confirmados</p>
         </div>
-        <div className="py-4 text-center border-r border-gray-200">
-          <p className="text-2xl font-medium text-gray-900">{stats.totalProvincias}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Províncias representadas</p>
+        <div className="py-3 px-2 text-center">
+          <p className="text-xl font-medium text-gray-900">{stats.totalProvincias}</p>
+          <p className="text-[11px] text-gray-500 mt-0.5 leading-tight">Províncias</p>
         </div>
-        <div className="py-4 text-center">
-          <p className="text-2xl font-medium text-gray-900">{dias}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Dias restantes</p>
+        <div className="py-3 px-2 text-center">
+          <p className="text-xl font-medium text-gray-900">
+            {inscricoesAbertas && dataTermino
+              ? Math.max(0, Math.ceil((dataTermino.getTime() - agora.getTime()) / (1000 * 60 * 60 * 24)))
+              : '—'}
+          </p>
+          <p className="text-[11px] text-gray-500 mt-0.5 leading-tight">Dias restantes</p>
         </div>
       </div>
 
@@ -104,14 +153,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* CTA final */}
-      <section className="px-6 pb-12 text-center">
-        <Link href="/inscricao" className="btn-primary mx-auto">
-          Fazer a minha inscrição agora
-        </Link>
-      </section>
+      {inscricoesAbertas && (
+        <section className="px-6 pb-12 text-center">
+          <Link href="/inscricao" className="btn-primary mx-auto">
+            Fazer a minha inscrição agora
+          </Link>
+        </section>
+      )}
 
-      {/* Footer */}
       <footer className="mt-auto bg-inp-navy py-4 text-center">
         <p className="text-blue-400 text-xs">
           © 2025 Instituto Nacional de Petróleos · inscricoes.inp.co.ao

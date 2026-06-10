@@ -1,6 +1,6 @@
 'use client'
 // src/app/inscricao/page.tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle, ChevronRight, ChevronLeft, Upload, X, FileText } from 'lucide-react'
 import axios from 'axios'
 import { PROVINCIAS, CURSOS, ANOS_CONCLUSAO } from '@/lib/constants'
+import { getPeriodoInscricao, getEstadoInscricao } from '@/lib/inscricoes'
 
 // ─── Schema de validação ────────────────────────────────
 const schema = z.object({
@@ -135,6 +136,8 @@ export default function InscricaoPage() {
   const [submetido, setSubmetido] = useState(false)
   const [erroBD, setErroBD] = useState('')
   const [loading, setLoading] = useState(false)
+  const [estadoPeriodo, setEstadoPeriodo] = useState<string | null>(null)
+  const [periodo, setPeriodo] = useState<any>(null)
 
   const [docBI, setDocBI] = useState<Ficheiro | null>(null)
   const [docCert, setDocCert] = useState<Ficheiro | null>(null)
@@ -145,6 +148,60 @@ export default function InscricaoPage() {
   const { register, handleSubmit, formState: { errors }, watch, trigger } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
+  useEffect(() => {
+    getPeriodoInscricao().then((p) => {
+      setPeriodo(p)
+      setEstadoPeriodo(getEstadoInscricao(p))
+    })
+  }, [])
+
+  // Mostrar ecrã de bloqueio se fora do período
+  if (estadoPeriodo === 'antes' && periodo) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <header className="bg-inp-navy px-6 py-3">
+          <p className="text-white text-sm font-medium">INP · Inscrição no teste psicotécnico</p>
+        </header>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="card max-w-md w-full text-center">
+            <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">⏳</span>
+            </div>
+            <h2 className="text-lg font-medium text-gray-900 mb-2">Inscrições ainda não abertas</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              As inscrições abrem a{' '}
+              <strong>{new Date(periodo.dataInicio).toLocaleDateString('pt-AO', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong>.
+            </p>
+            <a href="/" className="btn-secondary mx-auto">Voltar à página inicial</a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (estadoPeriodo === 'encerrada') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <header className="bg-inp-navy px-6 py-3">
+          <p className="text-white text-sm font-medium">INP · Inscrição no teste psicotécnico</p>
+        </header>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="card max-w-md w-full text-center">
+            <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">🔒</span>
+            </div>
+            <h2 className="text-lg font-medium text-gray-900 mb-2">Inscrições encerradas</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              O prazo de inscrição terminou a{' '}
+              <strong>{new Date(periodo.dataTermino).toLocaleDateString('pt-AO', { day: '2-digit', month: 'long', year: 'numeric' })}</strong>.
+            </p>
+            <a href="/" className="btn-secondary mx-auto">Voltar à página inicial</a>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   async function irParaPasso2() {
     const valido = await trigger(['nomeCompleto', 'numeroProcesso', 'bilheteIdentidade', 'genero', 'email', 'telefone', 'provincia', 'localizacaoActual'])

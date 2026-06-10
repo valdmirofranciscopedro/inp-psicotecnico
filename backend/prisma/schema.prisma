@@ -110,6 +110,15 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+model Configuracao {
+  id        String   @id @default(cuid())
+  chave     String   @unique
+  valor     String
+  updatedAt DateTime @updatedAt
+
+  @@map("configuracoes")
+}
+
 // ─────────────────────────────────────────
 // Enums
 // ─────────────────────────────────────────

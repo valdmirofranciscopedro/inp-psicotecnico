@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Users, BarChart2, Mail, Download,
   Shield, Settings, LogOut, Menu, X, ChevronRight,
 } from 'lucide-react'
+import Image from 'next/image'
 
 const NAV = [
   { grupo: 'Geral', items: [
@@ -47,9 +48,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className="px-4 py-4 border-b border-white/10">
-        <p className="text-white text-sm font-medium">INP · Admin</p>
+        <Image src="/logo-inp.png" alt="Logo INP" width={150} height={150} className="object-contain" />
         <p className="text-blue-400 text-xs mt-0.5">Painel administrativo</p>
         <span className="inline-block mt-1.5 bg-white/10 text-emerald-300 text-[10px] rounded px-1.5 py-0.5 tracking-wide">
           RESTRITO
@@ -60,6 +60,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       <nav className="flex-1 py-3 overflow-y-auto">
         {NAV.map((grupo) => (
           <div key={grupo.grupo} className="mb-1">
+            
             <p className="text-[10px] text-blue-500/70 uppercase tracking-wider px-4 py-2 font-medium">
               {grupo.grupo}
             </p>
@@ -134,18 +135,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         {/* Topbar */}
         <header className="bg-inp-navy px-4 py-2.5 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <button
-              className="md:hidden text-white"
-              onClick={() => setSidebarAberta(true)}
-              aria-label="Abrir menu"
-            >
+            <button className="md:hidden text-white" onClick={() => setSidebarAberta(true)}>
               <Menu size={20} />
             </button>
             <p className="text-white text-sm font-medium hidden md:block">
               INP · Painel Administrativo
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <p className="text-blue-300 text-xs hidden sm:block">{admin.email}</p>
             <div className="w-7 h-7 rounded-full bg-inp-blue flex items-center justify-center text-white text-xs font-medium">
               {admin.nome.charAt(0).toUpperCase()}
