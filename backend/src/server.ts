@@ -12,6 +12,7 @@ import { errorHandler } from './middleware/errorHandler'
 import { requestLogger } from './middleware/requestLogger'
 
 const app = express()
+app.set('trust proxy', 1) // necessário quando atrás do Nginx
 
 // ─── Segurança e middlewares base ───────────────────
 app.use(helmet({
