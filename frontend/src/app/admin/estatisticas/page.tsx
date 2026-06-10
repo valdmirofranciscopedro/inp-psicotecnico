@@ -42,7 +42,7 @@ export default function EstatisticasPage() {
             <BarChart data={inscricoesPorDia} margin={{ top: 0, right: 0, left: -28, bottom: 0 }}>
               <XAxis dataKey="data" tick={{ fontSize: 10 }} tickFormatter={(v) => v.slice(5)} />
               <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip formatter={(v: number) => [v, 'Inscrições']} contentStyle={{ fontSize: 11 }} />
+              <Tooltip formatter={(v) => [v, 'Inscrições']} contentStyle={{ fontSize: 11 }} />
               <Bar dataKey="total" fill="#185FA5" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -58,7 +58,7 @@ export default function EstatisticasPage() {
                   {porGenero.map((_: any, i: number) => <Cell key={i} fill={CORES[i]} />)}
                 </Pie>
                 <Legend formatter={(v) => v === 'MASCULINO' ? 'Masculino' : 'Feminino'} iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => [v, 'candidatos']} contentStyle={{ fontSize: 11 }} />
+                <Tooltip formatter={(v) => [v, 'candidatos']} contentStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -72,7 +72,7 @@ export default function EstatisticasPage() {
                   <Cell fill="#9FE1CB" />
                 </Pie>
                 <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => [v, 'candidatos']} contentStyle={{ fontSize: 11 }} />
+                <Tooltip formatter={(v) => [v, 'candidatos']} contentStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -86,7 +86,7 @@ export default function EstatisticasPage() {
               <XAxis type="number" tick={{ fontSize: 10 }} />
               <YAxis type="category" dataKey="provincia" tick={{ fontSize: 11 }} width={78}
                 tickFormatter={(v) => nomesProvincia[v] || v.replace(/_/g, ' ')} />
-              <Tooltip formatter={(v: number) => [v, 'inscrições']} contentStyle={{ fontSize: 11 }} />
+              <Tooltip formatter={(v) => [v, 'inscrições']} contentStyle={{ fontSize: 11 }} />
               <Bar dataKey="total" radius={[0, 3, 3, 0]}>
                 {porProvincia.map((_: any, i: number) => <Cell key={i} fill={CORES[Math.min(i, CORES.length - 1)]} />)}
               </Bar>
