@@ -41,7 +41,7 @@ export default function DashboardPage() {
     getDashboard().then(setDados).finally(() => setLoading(false))
   }, [])
 
-  if (loading) {
+  if (loading || !dados) {
     return (
       <AdminShell>
         <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
@@ -141,7 +141,7 @@ export default function DashboardPage() {
               </p>
               <ResponsiveContainer width="100%" height={100}>
                 <PieChart>
-                  <Pie data={porGenero} dataKey="_count.genero" nameKey="genero"
+                  <Pie data={porGenero} dataKey="total" nameKey="genero"
                     cx="50%" cy="50%" outerRadius={42} innerRadius={24}>
                     {porGenero.map((_: any, i: number) => (
                       <Cell key={i} fill={CORES_GENERO[i % CORES_GENERO.length]} />
@@ -162,10 +162,10 @@ export default function DashboardPage() {
               </p>
               <div className="flex gap-4">
                 {porLocalTeste.map((l: any, i: number) => (
-                  <div key={l.localTeste} className="flex items-center gap-2">
+                  <div key={l.local} className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background: CORES_LOCAL[i] }} />
-                    <span className="text-xs text-gray-600">{labelLocal[l.localTeste]}</span>
-                    <span className="text-sm font-medium text-gray-900">{l._count.localTeste}</span>
+                    <span className="text-xs text-gray-600">{labelLocal[l.local]}</span>
+                    <span className="text-sm font-medium text-gray-900">{l.total}</span>
                   </div>
                 ))}
               </div>
@@ -196,7 +196,7 @@ export default function DashboardPage() {
                 formatter={(v: number) => [v, 'inscrições']}
                 contentStyle={{ fontSize: 11 }}
               />
-              <Bar dataKey="_count.provincia" radius={[0, 3, 3, 0]}>
+              <Bar dataKey="total" radius={[0, 3, 3, 0]}>
                 {porProvincia.slice(0, 10).map((_: any, i: number) => (
                   <Cell key={i} fill={CORES_PROVINCIAS[Math.min(i, CORES_PROVINCIAS.length - 1)]} />
                 ))}
@@ -212,11 +212,11 @@ export default function DashboardPage() {
           </p>
           <div className="space-y-2">
             {porCurso.map((c: any, i: number) => {
-              const max = porCurso[0]?._count?.cursoFrequentado || 1
-              const pct = Math.round((c._count.cursoFrequentado / max) * 100)
+              const max = porCurso[0]?.total || 1
+              const pct = Math.round((c.total / max) * 100)
               return (
-                <div key={c.cursoFrequentado} className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 w-44 truncate">{c.cursoFrequentado}</span>
+                <div key={c.curso} className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 w-44 truncate">{c.curso}</span>
                   <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full bg-inp-blue"
@@ -224,7 +224,7 @@ export default function DashboardPage() {
                     />
                   </div>
                   <span className="text-xs font-medium text-gray-700 w-8 text-right">
-                    {c._count.cursoFrequentado}
+                    {c.total}
                   </span>
                 </div>
               )

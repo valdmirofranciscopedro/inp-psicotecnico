@@ -166,7 +166,7 @@ export default function InscricaoPage() {
 
     const formData = new FormData()
     Object.entries(dados).forEach(([k, v]) => { if (v) formData.append(k, v) })
-    formData.append('bilheteIdentidade_doc', docBI.file)
+    formData.append('bilheteIdentidade', docBI.file)
     formData.append('certificadoHabilitacoes', docCert.file)
     formData.append('curriculumVitae', docCV.file)
 

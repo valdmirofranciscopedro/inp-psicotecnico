@@ -29,11 +29,11 @@ export async function getDashboardStats(req: Request, res: Response, next: NextF
       prisma.candidato.groupBy({ by: ['cursoFrequentado'], _count: { cursoFrequentado: true }, orderBy: { _count: { cursoFrequentado: 'desc' } } }),
       // Inscrições dos últimos 30 dias
       prisma.$queryRaw<{ data: string; total: number }[]>`
-        SELECT DATE(created_at)::text as data, COUNT(*)::int as total
+        SELECT DATE("createdAt")::text as data, COUNT(*)::int as total
         FROM candidatos
-        WHERE created_at >= NOW() - INTERVAL '30 days'
-        GROUP BY DATE(created_at)
-        ORDER BY DATE(created_at)
+        WHERE "createdAt" >= NOW() - INTERVAL '30 days'
+        GROUP BY DATE("createdAt")
+        ORDER BY DATE("createdAt")
       `,
     ])
 
