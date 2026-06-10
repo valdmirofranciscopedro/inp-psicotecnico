@@ -124,7 +124,7 @@ export default function DashboardPage() {
                 <XAxis dataKey="data" tick={{ fontSize: 10 }} tickFormatter={(v) => v.slice(5)} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip
-                  formatter={(v: number) => [v, 'Inscrições']}
+                  formatter={(v) => [v, 'Inscrições']}
                   labelFormatter={(l) => `Dia ${l}`}
                   contentStyle={{ fontSize: 11 }}
                 />
@@ -152,7 +152,7 @@ export default function DashboardPage() {
                     iconSize={8}
                     wrapperStyle={{ fontSize: 11 }}
                   />
-                  <Tooltip formatter={(v: number) => [v, 'candidatos']} contentStyle={{ fontSize: 11 }} />
+                  <Tooltip formatter={(v) => [v, 'candidatos']} contentStyle={{ fontSize: 11 }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -193,7 +193,7 @@ export default function DashboardPage() {
                 tickFormatter={(v) => v.replace('_', ' ')}
               />
               <Tooltip
-                formatter={(v: number) => [v, 'inscrições']}
+                formatter={(v) => [v, 'inscrições']}
                 contentStyle={{ fontSize: 11 }}
               />
               <Bar dataKey="total" radius={[0, 3, 3, 0]}>
